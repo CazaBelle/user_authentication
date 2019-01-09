@@ -2,6 +2,7 @@ ENV['RACK_ENV'] = 'development'
 
 require 'sinatra/base'
 require './config/data_mapper'
+require 'pry'
 
 class UserAuth < Sinatra::Base
   enable :sessions
@@ -24,13 +25,24 @@ class UserAuth < Sinatra::Base
   end
 
   post '/signup' do
-    user = User.create(email: params[:email], password: params[:password])
+    # binding.pry
+    user = User.authenticate(params[:email], params[:password])
     if user
-      session[:user_id] = user.id
-      redirect '/profile'
+      redirect '/error'
     else
-      redirect '/'
+      user = User.create(email: params[:email], password: params[:password])
+        if user
+          session[:user_id] = user.id
+          redirect '/profile'
+        else
+          redirect '/'
+        end
     end
+   
+  end
+
+  get '/error' do
+    erb :error
   end
 
   get '/signin' do
